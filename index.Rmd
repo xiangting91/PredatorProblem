@@ -79,4 +79,4 @@ The clusters are even sized (6-7 incidents apiece). The purple cluster center (d
 
 ## Next Steps
 
-As you can see, the analysis requires more tweaking. For those who are interested, the csv can be found on my GitHub [repo](addhere). Do let me know if you have any feedback or suggestions. Meanwhile to all Yishunites, please help keep a lookout for our feline friends.
+As you can see, the analysis requires more tweaking. For those who are interested, the csv can be found on my GitHub [repo](https://github.com/lyzs90/PredatorProblem). Do let me know if you have any feedback or suggestions. Meanwhile to all Yishunites, please help keep a lookout for our feline friends.
