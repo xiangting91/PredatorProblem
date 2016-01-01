@@ -1,15 +1,15 @@
 ---
 title: "Predator Problem"
 author: "lyzs90"
-date: "1 January 2016"
+date: "2 January 2016"
 output: html_document
 ---
 
-##Introduction
+###Introduction
 
-In the past three months, there has been 19 documented incidents of cat abuse in Yishun. Most of the cats were found dead. Even after the arrest of a suspect on 27 Dec, there was yet another incident on 30 Dec. So I've decided to do some rudimentary geographic profiling in **R**. My goal was to see if more than one culprit has been preying on the cats all along or if there was an emergence of a copycat killer. Hopefully, I want to also identify the probable area of residence of the culprit(s).    
+In the past three months, there has been 19 documented incidents of cat abuse in Yishun. Most of the cats were found dead. Even after the arrest of a suspect on 27 Dec, there was yet another incident on 30 Dec. So I've decided to do some rudimentary geographic profiling in **R**. My goal was to see if more than one culprit has been preying on the cats all along or if there was an emergence of a copycat killer. Hopefully, I want to also identify the probable area of residence of the culprit(s). 
 
-##Data Preparation
+###Data Preparation
 
 Referencing [this](http://news.asiaone.com/sites/default/files/cat5.jpg) map done up by the Straits Times, I sourced for the geographic coordinates of all the incidents on Google Maps and keyed the data onto a spreadsheet. Basically, the features I extracted are longitude and latitude, both in decimal degrees. I then normalized the features.
 
@@ -25,9 +25,16 @@ df <- cat %>%
 head(df)
 ```
 
-## How many culprits are there?
+### How many culprits are there?
 
-I would suppose that the incidents usually take place at night and public transport would be unavailable. So if the offender walks the distance he can cover from his home is going to be limited. Unless he cycles, then it's quite possible to cover the entire area if he stays somewhere central. However, we know that the first suspect lives at Block 115B and it's highly unlikely that he will travel to Block 355, for instance. Hence, I would think that there are multiple culprits even prior to Dec 27. So for a start, I'm going to use an off-the-shelf k-means algorithm to look for clusters in the data.
+Looking at the literature on geographic profiling, there are two accepted beliefs about typical serial criminal behavior:
+
+1. They do not commit crimes too close to their base of operations i.e. the concept of a buffer zone
+2. They do not travel further than necessary to find victims
+
+However, it would seem that the first axiom doesn't quite hold as there were two incidents at Block 115B, which is the residence of the arrested suspect. This is of course, assuming that these crimes were committed by the arrested suspect. Which leaves us with the second axiom, that ultimately, the location has to be convenient.
+
+Given the incidents probably took place late at night, so if the culprit walks, the distance he can cover from his home is going to be limited. Unless he cycles, then it's quite possible to cover the entire area if his base is somewhere central. Hence, it seems quite unlikely that the arrested suspect will travel to say Block 355, for instance. This supports the existence of multiple culprits. So for a start, I'm going to use an off-the-shelf k-means algorithm to look for clusters in the data. The algorithm seeks to partition the 19 crime locations into k clusters, whereby each crime location belongs to the cluster with the nearest center of mass. Each cluster could possibly be the area of operations of one culprit with his base being near the center of mass.
 
 First, I determine optimal number of clusters to search for using the NbClust package. This passes the features through 30 indices. Each index will suggest a cluster and then by taking a majority vote, an optimal number of clusters is recommended. 
 
@@ -43,9 +50,9 @@ barplot(table(nc$Best.n[1,]),
 
 Given a range of 2-5 clusters to work with, NbClust recommends that we use 3 clusters. Does this mean that there may potentially be up to 3 culprits? 
 
-## Where are the potential bases?
+### Where are the potential bases?
 
-The resultant clusters are shown below, denoted by the crosses. The clusters are even sized (about 6-7 incidents each).
+The resultant clusters are shown below, denoted by the crosshairs. The clusters are even sized (about 6-7 incidents each).
 
 ```{r, echo=F, message=F, warning=F}
 set.seed(12345)
@@ -62,7 +69,7 @@ library(ggmap)
 library(ggplot2)
 # draw boundary box
 lat <- c(1.405, 1.45)                
-lon <- c(103.835, 103.84)   
+lon <- c(103.835, 103.84)
 map.loc <- get_map(location = c(lon = mean(lon), lat = mean(lat)),
                 maptype = "terrain",
                 source = "google",
@@ -71,15 +78,15 @@ map.loc <- get_map(location = c(lon = mean(lon), lat = mean(lat)),
 ggmap(map.loc, extent = 'device')+
     geom_point(data = cat, aes(x = longitude, y = latitude, color = labels), size=4)+
     geom_point(data = clust.means, aes(x = longitude, y = latitude, color=labels),
-               size=8,
-               shape=4)+
+               size=5,
+               shape=10)+
+    geom_point(data = cat, aes(x = 103.82688, y = 1.433828), color = "red", size=6, shape="O")+
+    geom_point(data = cat, aes(x = 103.830705, y = 1.429337), color = "blue", size=6, shape="O")+
     scale_colour_brewer("Cluster", palette = "Dark2")
 ```
 
-The purple cluster center is close to the first suspects home. However, I also noted that the algorithm incorrectly assigned the latest incident on 30 Dec to the purple cluster. Perhaps including the incident date in our feature set could prevent such erroneous assignment?
+The purple cluster center is close to the first suspects home (red outline). However, I also noted that the algorithm incorrectly assigned the latest incident on 30 Dec (blue outline) to the purple cluster. Perhaps including the incident date in our feature set could prevent such erroneous assignment?
 
-## Next Steps
+### Next Steps
 
-As you can see, the analysis requires more tweaking. For those who are interested, the csv can be found on my GitHub [repo](https://github.com/lyzs90/PredatorProblem). Do let me know if you have any feedback or suggestions. Meanwhile to all Yishunites, please help keep a lookout for our feline friends.
-
-
+As you can see, the analysis requires more tweaking. The good news is that we have one labelled data point to serve as a cross-check. For those who are interested, the csv and code can be found on my GitHub [repo](https://github.com/lyzs90/PredatorProblem). Do let me know if you have any feedback or suggestions. More data would be greatly appreciated also. Meanwhile to all Yishunites, please help keep a lookout for our feline friends.
