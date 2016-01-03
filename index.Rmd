@@ -17,11 +17,14 @@ Here is a snapshot of the features used:
 
 ```{r, echo=F, message=F, warning=F}
 library(dplyr)
+library(lubridate)
 cat <- read.csv("cat.csv", header=T)
+cat$date <- as.numeric(dmy(cat$date)) # convert to POSIX time
 cat$norm_lon <- scale(cat$longitude)
 cat$norm_lat <- scale(cat$latitude)
+cat$norm_date <- scale(cat$date)
 df <- cat %>%
-        select(norm_lon, norm_lat)
+        select(norm_lat, norm_lon)
 head(df)
 ```
 
@@ -60,8 +63,7 @@ fit.km <- kmeans(df, 3, nstart=25) # do 25 different starts and choose the best
 cat$labels <- as.factor(fit.km$cluster)
 
 ## obtain unscaled clust means
-clust.means <- aggregate(cat[2:3], by=list(cluster=fit.km$cluster), mean)
-colnames(clust.means)[1] <- "labels"
+clust.means <- aggregate(cat[2:3], by=list(labels=fit.km$cluster), mean)
 clust.means$labels <- as.factor(clust.means$labels)
 
 ## plot on map
@@ -72,7 +74,7 @@ library(scales)
 # create voronoi line segments using centroids from k-means
 xrng <- expand_range(range(clust.means[,3]), .4) # adjust to lengthen voronoi lines
 yrng <- expand_range(range(clust.means[,2]), .4) # adjust to lengthen voronoi lines
-voronoi <- deldir(clust.means[,3],clust.means[,2], rw = c(xrng, yrng))
+voronoi <- deldir(x=clust.means[,3], y=clust.means[,2], rw = c(xrng, yrng))
 # draw boundary box
 lat <- c(1.405, 1.45)                
 lon <- c(103.835, 103.84)
@@ -99,7 +101,7 @@ ggmap(map.loc, extent = 'device')+
     scale_colour_brewer("Cluster", palette = "Dark2")
 ```
 
-The purple cluster center is close to the first suspects home (red outline). However, I also noted that the algorithm incorrectly assigned the latest incident on 30 Dec (blue outline) to the purple cluster. Perhaps including the incident date in our feature set could prevent such erroneous assignment?
+The purple cluster center is close to the first suspects home (red outline). However, I also noted that the algorithm incorrectly assigned the latest incident on 30 Dec (blue outline) to the purple cluster. Perhaps including the incident date in our feature set could prevent such erroneous assignment? I do have the date variable, but don't quite know how to use it yet. I tried converting it to POSIX time and then normalizing it but that does not seem to produce sensible clusters. I'm thinking of making use of it when normalizing longitude and latitude. Pointers anyone?
 
 ### Next Steps
 
