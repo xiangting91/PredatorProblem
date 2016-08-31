@@ -1,3 +1,3 @@
-# Predator Problem
-The csv file contains the data used in the analysis.  
-Use this [link](http://lyzs90.github.io/PredatorProblem) to access the gh-pages site.
+# [Predator Problem](http://lyzs90.github.io/PredatorProblem/)
+
+A basic geographic profiling exercise in R. The csv file contains the data used in the analysis.
