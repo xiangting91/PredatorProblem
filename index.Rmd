@@ -57,7 +57,7 @@ Given a range of 2-5 clusters to work with, NbClust recommends that we use 3 clu
 
 The resultant clusters are shown below, denoted by the crosshairs. The clusters are even sized (about 6-7 incidents each).
 
-```{r, echo=F, message=F, warning=F, results='hide'}
+```{r, echo=F, message=F, warning=F}
 set.seed(12345)
 fit.km <- kmeans(df, 3, nstart=25) # do 25 different starts and choose the best
 cat$labels <- as.factor(fit.km$cluster)
